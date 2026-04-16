@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --admin-bg: #f3f6fb;
+  --admin-bg-top: rgba(59, 130, 246, 0.1);
+  --admin-bg-side: rgba(20, 184, 166, 0.06);
+  --admin-scroll-track: rgba(148, 163, 184, 0.08);
+  --admin-scroll-thumb: rgba(100, 116, 139, 0.26);
+  --admin-brand-bg: rgba(255, 255, 255, 0.98);
+  --admin-brand-border: rgba(148, 163, 184, 0.16);
+  --admin-brand-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --admin-toolbar-bg: #ffffff;
+  --admin-toolbar-border: rgba(148, 163, 184, 0.16);
+  --admin-toolbar-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  --admin-surface-bg: #f8fafc;
+  --admin-surface-border: rgba(148, 163, 184, 0.16);
+  --admin-tab-bg: rgba(255, 255, 255, 0.85);
+  --admin-tab-border: rgba(148, 163, 184, 0.18);
+  --admin-tab-color: rgba(15, 23, 42, 0.55);
+  --admin-tab-hover: rgba(255, 255, 255, 1);
+  --admin-tab-active-bg: rgba(37, 99, 235, 0.1);
+  --admin-tab-active-border: rgba(37, 99, 235, 0.2);
+  --admin-tab-active-color: #0f172a;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+  --admin-bg: #101318;
+  --admin-bg-top: rgba(59, 130, 246, 0.16);
+  --admin-bg-side: rgba(34, 197, 94, 0.08);
+  --admin-scroll-track: rgba(255, 255, 255, 0.03);
+  --admin-scroll-thumb: rgba(148, 163, 184, 0.28);
+  --admin-brand-bg: rgba(17, 20, 26, 0.92);
+  --admin-brand-border: rgba(255, 255, 255, 0.06);
+  --admin-brand-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --admin-toolbar-bg: rgba(21, 24, 31, 0.84);
+  --admin-toolbar-border: rgba(255, 255, 255, 0.06);
+  --admin-toolbar-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  --admin-surface-bg: rgba(255, 255, 255, 0.02);
+  --admin-surface-border: rgba(255, 255, 255, 0.06);
+  --admin-tab-bg: rgba(255, 255, 255, 0.03);
+  --admin-tab-border: rgba(255, 255, 255, 0.06);
+  --admin-tab-color: rgba(255, 255, 255, 0.55);
+  --admin-tab-hover: rgba(255, 255, 255, 0.04);
+  --admin-tab-active-bg: rgba(59, 130, 246, 0.12);
+  --admin-tab-active-border: rgba(59, 130, 246, 0.28);
+  --admin-tab-active-color: #eff6ff;
+}
+
+body {
+  @apply m-0 min-h-screen font-["Inter","PingFang_SC","Microsoft_YaHei",sans-serif] antialiased;
+  background-color: var(--admin-bg);
+  background-image:
+    radial-gradient(circle at top, var(--admin-bg-top), transparent 20%),
+    radial-gradient(circle at right top, var(--admin-bg-side), transparent 18%),
+    linear-gradient(180deg, var(--admin-bg) 0%, var(--admin-bg) 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--admin-scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--admin-scroll-thumb);
+  border-radius: 999px;
+}
+
+.admin-app {
+  min-height: 100vh;
+}
+
+.admin-layout {
+  min-height: 100vh;
+  background: transparent;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-sider__inner {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.admin-sider__menu {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.admin-brand-card {
+  border: 1px solid var(--admin-brand-border);
+  background: var(--admin-brand-bg);
+  box-shadow: var(--admin-brand-shadow);
+  border-radius: 8px;
+}
+
+.admin-page {
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+}
+
+.admin-toolbar-card {
+  border: 1px solid var(--admin-toolbar-border);
+  background: var(--admin-toolbar-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--admin-toolbar-shadow);
+}
+
+.admin-stat-card {
+  background: var(--admin-toolbar-bg);
+  min-height: 106px;
+}
+
+.admin-surface-muted {
+  background: var(--admin-surface-bg);
+  border: 1px solid var(--admin-surface-border);
+  border-radius: 8px;
+}
+
+.admin-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-tab-border);
+  background: var(--admin-tab-bg);
+  color: var(--admin-tab-color);
+  font-size: 12px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.admin-tab:hover {
+  background: var(--admin-tab-hover);
+}
+
+.admin-tab--active {
+  border-color: var(--admin-tab-active-border);
+  background: var(--admin-tab-active-bg);
+  color: var(--admin-tab-active-color);
+}
+
+.admin-tab__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+}
+
+.admin-tab__close:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.chart-panel {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
+.chart-panel canvas {
+  height: 100% !important;
+  max-height: none;
+}
+
+.chart-panel--bar {
+  max-height: 204px;
+}
+
+.chart-panel--donut {
+  margin: 0 auto;
+  width: min(100%, 206px);
+  max-height: 206px;
+}
+
+html:not(.dark) .admin-app .text-white {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .admin-app .text-white\/88 {
+  color: rgba(15, 23, 42, 0.88) !important;
+}
+
+html:not(.dark) .admin-app .text-white\/82 {
+  color: rgba(15, 23, 42, 0.82) !important;
+}
+
+html:not(.dark) .admin-app .text-white\/60 {
+  color: rgba(15, 23, 42, 0.6) !important;
+}
+
+html:not(.dark) .admin-app .text-white\/55,
+html:not(.dark) .admin-app .text-white\/50,
+html:not(.dark) .admin-app .text-white\/48,
+html:not(.dark) .admin-app .text-white\/46,
+html:not(.dark) .admin-app .text-white\/45,
+html:not(.dark) .admin-app .text-white\/42,
+html:not(.dark) .admin-app .text-white\/40,
+html:not(.dark) .admin-app .text-white\/38,
+html:not(.dark) .admin-app .text-white\/35,
+html:not(.dark) .admin-app .text-white\/30 {
+  color: rgba(15, 23, 42, 0.5) !important;
+}
