@@ -161,7 +161,6 @@ const columns = computed<DataTableColumns<FamilyGroup>>(() => [
     <NCard class="admin-toolbar-card" :bordered="false" title="家族列表">
       <div class="mb-4 flex flex-wrap items-center gap-3">
         <NButton type="primary" @click="router.push('/families/new')">新增家族</NButton>
-        <NTag round type="info">{{ adminStore.source === "api" ? "已连接 API" : "模拟数据" }}</NTag>
       </div>
 
       <NDataTable

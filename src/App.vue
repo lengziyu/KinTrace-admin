@@ -254,9 +254,19 @@ watch(
                   content-style="padding: 18px 14px;"
                 >
                   <div class="admin-sider__inner">
-                    <RouterLink to="/settings" class="mb-5">
+                    <RouterLink to="/settings" class="mb-5 block">
                       <div class="admin-brand-card rounded-[20px] px-4 py-4">
-                        <BrandLogo compact />
+                        <div class="flex items-start gap-3">
+                          <BrandLogo compact />
+                          <div class="min-w-0">
+                            <p class="text-[11px] uppercase tracking-[0.28em] text-white/32">
+                              {{ brandStore.settings.appNameEn }}
+                            </p>
+                            <p class="mt-2 text-lg font-semibold text-white">
+                              {{ brandStore.settings.appNameZh }}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </RouterLink>
 
@@ -296,9 +306,6 @@ watch(
                       </div>
 
                       <NSpace align="center" :size="12">
-                        <NTag round size="small" type="info">
-                          {{ adminStore.source === "api" ? "实时数据" : "演示数据" }}
-                        </NTag>
                         <NTag round size="small" type="warning">
                           待审 {{ adminStore.summary.pendingMessages }}
                         </NTag>
