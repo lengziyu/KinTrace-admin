@@ -19,10 +19,10 @@ import { useAuthStore } from "@/stores/auth";
 const APP_VERSION = "MVP 0.3.0";
 
 const loginMode = ref<"family" | "super">("family");
-const phone = ref("13800001001");
-const inviteCode = ref("chenshi_237");
-const username = ref("superadmin");
-const password = ref("KinTrace123");
+const phone = ref("");
+const inviteCode = ref("");
+const username = ref("");
+const password = ref("");
 const router = useRouter();
 const authStore = useAuthStore();
 const error = ref("");
@@ -41,14 +41,14 @@ async function submit() {
     if (loginMode.value === "family") {
       await authStore.login({
         mode: "family",
-        phone: phone.value,
-        inviteCode: inviteCode.value,
+        phone: phone.value.trim(),
+        inviteCode: inviteCode.value.trim(),
       });
     } else {
       await authStore.login({
         mode: "super",
-        username: username.value,
-        password: password.value,
+        username: username.value.trim(),
+        password: password.value.trim(),
       });
     }
 
@@ -90,8 +90,8 @@ async function submit() {
               <p class="mt-3 text-lg font-semibold text-white">账号 + 密码</p>
             </div>
             <div class="admin-surface-muted p-4">
-              <p class="text-sm text-white/48">默认超管</p>
-              <p class="mt-3 text-lg font-semibold text-white">superadmin</p>
+              <p class="text-sm text-white/48">登录策略</p>
+              <p class="mt-3 text-lg font-semibold text-white">无默认填充</p>
             </div>
           </div>
         </div>
@@ -123,6 +123,7 @@ async function submit() {
                     v-model:value="phone"
                     size="large"
                     placeholder="请输入家族管理员手机号"
+                    :input-props="{ autocomplete: 'off' }"
                   />
                 </NFormItem>
                 <NFormItem label="家族邀请码">
@@ -130,6 +131,7 @@ async function submit() {
                     v-model:value="inviteCode"
                     size="large"
                     placeholder="例如：chenshi_237"
+                    :input-props="{ autocomplete: 'off' }"
                   />
                 </NFormItem>
 
@@ -148,6 +150,7 @@ async function submit() {
                     v-model:value="username"
                     size="large"
                     placeholder="请输入超级管理员账号"
+                    :input-props="{ autocomplete: 'off' }"
                   />
                 </NFormItem>
                 <NFormItem label="密码">
@@ -157,6 +160,7 @@ async function submit() {
                     type="password"
                     show-password-on="click"
                     placeholder="请输入登录密码"
+                    :input-props="{ autocomplete: 'new-password' }"
                   />
                 </NFormItem>
 
