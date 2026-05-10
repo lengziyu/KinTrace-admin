@@ -63,7 +63,7 @@ const summaryCards = computed(() => [
     icon: Users,
   },
   {
-    label: "墓点数量",
+    label: "点位数量",
     value: adminStore.summary.tombs,
     hint: "地图坐标已经录入完成",
     color: "#f59e0b",
@@ -79,7 +79,7 @@ const summaryCards = computed(() => [
 ]);
 
 const overviewChartData = computed(() => ({
-  labels: ["成员", "墓点", "线路", "留言"],
+  labels: ["成员", "点位", "路线模板", "留言"],
   datasets: [
     {
       label: "当前规模",
@@ -170,7 +170,7 @@ const doughnutOptions = computed(() => ({
 const shortcuts = computed(() => {
   const cards = [
     {
-      label: "墓点管理",
+      label: "点位管理",
       hint: "录入坐标、封面图和纪念区信息",
       icon: MapPinned,
       to: "/tombs",
@@ -183,7 +183,7 @@ const shortcuts = computed(() => {
     },
     {
       label: "线路设置",
-      hint: "快速维护当年的祭扫顺序",
+      hint: "维护主线路和常用模板",
       icon: Route,
       to: "/routes",
     },
@@ -229,7 +229,7 @@ const nextReminder = computed(() => {
       <div>
         <h2 class="text-[22px] font-semibold text-white">概览工作台</h2>
         <p class="mt-1 text-sm text-white/46">
-          {{ authStore.profile?.displayName ?? "管理员" }}，今天优先关注家族设置、墓点资料和留言审核。
+          {{ authStore.profile?.displayName ?? "管理员" }}，今天优先关注家族设置、点位资料和留言审核。
         </p>
       </div>
       <NSpace :size="10">

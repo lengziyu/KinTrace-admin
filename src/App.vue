@@ -72,7 +72,7 @@ const menuOptions = computed<MenuOption[]>(() => {
   const base: MenuOption[] = [
     { key: "/dashboard", label: "概览", icon: renderIcon(LayoutDashboard) },
     { key: "/members", label: "成员管理", icon: renderIcon(Users) },
-    { key: "/tombs", label: "墓点管理", icon: renderIcon(MapPinned) },
+    { key: "/tombs", label: "点位管理", icon: renderIcon(MapPinned) },
     { key: "/tasks", label: "年度任务", icon: renderIcon(LayoutDashboard) },
     { key: "/messages", label: "留言审核", icon: renderIcon(MessageSquareMore) },
     { key: "/routes", label: "线路设置", icon: renderIcon(Route) },
@@ -86,13 +86,22 @@ const menuOptions = computed<MenuOption[]>(() => {
   return base;
 });
 
+function resolveMenuKey(path: string) {
+  if (path.startsWith("/families/")) return "/families";
+  if (path.startsWith("/members/")) return "/members";
+  if (path.startsWith("/tombs/")) return "/tombs";
+  if (path.startsWith("/tasks/")) return "/tasks";
+  if (path.startsWith("/routes/")) return "/routes";
+  return path;
+}
+
 const isStandalonePage = computed(() => ["/login", "/about"].includes(route.path));
 const pageTitle = computed(() => String(route.meta.title ?? "概览"));
 const familyTitle = computed(() => adminStore.currentFamily?.name?.trim() || "");
 const currentTitle = computed(() =>
   !isStandalonePage.value && familyTitle.value ? `${familyTitle.value} · ${pageTitle.value}` : pageTitle.value,
 );
-const activeMenu = computed(() => route.path);
+const activeMenu = computed(() => resolveMenuKey(route.path));
 const naiveTheme = computed(() => (themeStore.actualTheme === "dark" ? darkTheme : undefined));
 const themeIcon = computed(() => (themeStore.actualTheme === "dark" ? MoonStar : SunMedium));
 const themeLabel = computed(() => (themeStore.actualTheme === "dark" ? "切换到浅色主题" : "切换到深色主题"));
@@ -147,17 +156,18 @@ function confirmFamilyChoice() {
 }
 
 function syncVisitedTabs(path: string, title: string) {
-  if (isStandalonePage.value || path === "/dashboard" || !routablePaths.value.has(path)) {
+  const menuKey = resolveMenuKey(path);
+  if (isStandalonePage.value || menuKey === "/dashboard" || !routablePaths.value.has(menuKey)) {
     return;
   }
 
-  const exists = visitedTabs.value.find((item) => item.path === path);
+  const exists = visitedTabs.value.find((item) => item.path === menuKey);
   if (exists) {
     exists.title = title;
     return;
   }
 
-  visitedTabs.value.push({ path, title });
+  visitedTabs.value.push({ path: menuKey, title });
 }
 
 function closeTab(path: string) {
@@ -170,7 +180,7 @@ function closeTab(path: string) {
     return;
   }
 
-  const isCurrent = route.path === path;
+  const isCurrent = resolveMenuKey(route.path) === path;
   visitedTabs.value.splice(targetIndex, 1);
 
   if (!isCurrent) {
@@ -292,7 +302,7 @@ watch(
                         <NTag round size="small" type="warning">
                           待审 {{ adminStore.summary.pendingMessages }}
                         </NTag>
-                        <NInput round clearable placeholder="搜索页面、成员、墓点" style="width: 260px">
+                        <NInput round clearable placeholder="搜索页面、成员、点位" style="width: 260px">
                           <template #prefix>
                             <NIcon><Search /></NIcon>
                           </template>
@@ -334,7 +344,7 @@ watch(
                         :key="tab.path"
                         type="button"
                         class="admin-tab"
-                        :class="{ 'admin-tab--active': tab.path === route.path }"
+                        :class="{ 'admin-tab--active': activeMenu === tab.path }"
                         @click="router.push(tab.path)"
                       >
                         <span>{{ tab.title }}</span>

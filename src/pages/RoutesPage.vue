@@ -1,9 +1,22 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { NButton, NCard, NDatePicker, NInput, NTag, useMessage } from "naive-ui";
+import { computed, h, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import {
+  NButton,
+  NCard,
+  NDataTable,
+  NDatePicker,
+  NInput,
+  NSpace,
+  NTag,
+  useMessage,
+  type DataTableColumns,
+} from "naive-ui";
 import { useAdminStore } from "@/stores/admin";
+import type { RoutePlan } from "@/types/models";
 
 const adminStore = useAdminStore();
+const router = useRouter();
 const message = useMessage();
 const saveLoading = ref(false);
 const dateSaving = ref(false);
@@ -13,6 +26,7 @@ const selectedTombIds = ref<string[]>([]);
 const morningTombCount = ref(0);
 const afternoonTombCount = ref(0);
 const worshipDate = ref<number | null>(null);
+const keyword = ref("");
 
 const currentFamily = computed(() => adminStore.currentFamily);
 const currentRoute = computed(() => {
@@ -44,6 +58,25 @@ const availableTombs = computed(() =>
   familyTombs.value.filter((item) => !selectedTombIds.value.includes(item.id)),
 );
 
+const filteredRoutes = computed(() => {
+  const familyId = adminStore.currentFamily?.id;
+  const normalizedKeyword = keyword.value.trim().toLowerCase();
+
+  return adminStore.routes.filter((item) => {
+    if (familyId && item.familyId !== familyId) {
+      return false;
+    }
+
+    if (!normalizedKeyword) {
+      return true;
+    }
+
+    return [item.name, item.description, ...resolvePointNames(item.tombIds)]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(normalizedKeyword));
+  });
+});
+
 const morningStops = computed(() => selectedTombs.value.slice(0, morningTombCount.value));
 const afternoonStops = computed(() =>
   selectedTombs.value.slice(morningTombCount.value, morningTombCount.value + afternoonTombCount.value),
@@ -67,6 +100,12 @@ function formatDateTime(value?: string | null) {
   });
 }
 
+function resolvePointNames(tombIds: string[]) {
+  return tombIds
+    .map((id) => adminStore.tombs.find((item) => item.id === id)?.name)
+    .filter((item): item is string => Boolean(item));
+}
+
 function clampScheduleCounts() {
   const total = selectedTombIds.value.length;
   morningTombCount.value = Math.max(0, Math.min(total, morningTombCount.value));
@@ -75,7 +114,7 @@ function clampScheduleCounts() {
 }
 
 function syncFromCurrentRoute() {
-  routeName.value = currentRoute.value?.name ?? `${new Date().getFullYear()} 扫墓主线路`;
+  routeName.value = currentRoute.value?.name ?? `${new Date().getFullYear()} 清明主线路`;
   routeDescription.value = currentRoute.value?.description ?? "";
   selectedTombIds.value = [...(currentRoute.value?.tombIds ?? [])];
   morningTombCount.value = currentRoute.value?.morningTombCount ?? 0;
@@ -163,7 +202,7 @@ async function saveRoutePlan() {
   }
 
   if (selectedTombIds.value.length === 0) {
-    message.warning("请至少加入一个墓点");
+    message.warning("请至少加入一个点位");
     return;
   }
 
@@ -208,6 +247,60 @@ async function saveRoutePlan() {
   }
 }
 
+async function remove(routeId: string) {
+  try {
+    await adminStore.deleteRoute(routeId);
+    message.success("路线模板已删除");
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : "路线删除失败");
+  }
+}
+
+const columns = computed<DataTableColumns<RoutePlan>>(() => [
+  {
+    title: "路线名称",
+    key: "name",
+    render: (row) =>
+      h("div", { class: "space-y-1" }, [
+        h("div", { class: "flex items-center gap-2" }, [
+          h("p", { class: "text-sm font-semibold text-white" }, row.name),
+          row.isPrimary ? h(NTag, { size: "small", round: true, type: "info" }, { default: () => "主线路" }) : null,
+        ]),
+        h("p", { class: "text-xs text-white/42" }, row.description || "暂无路线说明"),
+      ]),
+  },
+  {
+    title: "点位顺序",
+    key: "tombIds",
+    render: (row) => resolvePointNames(row.tombIds).join(" -> ") || "暂无点位顺序",
+  },
+  {
+    title: "创建成员",
+    key: "createdByMemberId",
+    render: (row) => adminStore.members.find((item) => item.id === row.createdByMemberId)?.nickname || "未指定",
+  },
+  {
+    title: "操作",
+    key: "actions",
+    width: 160,
+    render: (row) =>
+      h(NSpace, { size: 8 }, {
+        default: () => [
+          h(
+            NButton,
+            { text: true, type: "primary", onClick: () => void router.push(`/routes/${row.id}/edit`) },
+            { default: () => "编辑" },
+          ),
+          h(
+            NButton,
+            { text: true, type: "error", onClick: () => void remove(row.id) },
+            { default: () => "删除" },
+          ),
+        ],
+      }),
+  },
+]);
+
 watch(currentRoute, syncFromCurrentRoute, { immediate: true });
 watch(
   () => currentFamily.value?.upcomingWorshipAt,
@@ -223,7 +316,7 @@ watch(selectedTombIds, clampScheduleCounts);
 
 <template>
   <div class="space-y-6">
-    <NCard class="admin-toolbar-card" :bordered="false" title="扫墓线路设置">
+    <NCard class="admin-toolbar-card" :bordered="false" title="主线路设置">
       <template v-if="currentFamily">
         <div class="grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
           <div class="admin-surface-muted p-5">
@@ -235,7 +328,7 @@ watch(selectedTombIds, clampScheduleCounts);
               </NTag>
             </div>
             <p class="mt-3 text-sm leading-7 text-white/62">
-              日期、上午、下午安排已经压缩到同一块里设置，页面更紧凑；以后如果扩成多天，也能按同样结构继续加。
+              这里用于维护成员端优先看到的主线路；下面的模板列表则可以沉淀不同场景的备用路线。
             </p>
             <div
               v-if="currentRoute?.planRevision && currentRoute.planRevision > 1"
@@ -285,7 +378,7 @@ watch(selectedTombIds, clampScheduleCounts);
             <p class="mb-2 text-sm text-white/62">线路说明</p>
             <NInput
               v-model:value="routeDescription"
-              placeholder="例如：上午先扫祖坟区，下午再走支系墓点"
+              placeholder="例如：上午先扫祖坟区，下午再走支系点位"
             />
           </div>
         </div>
@@ -331,7 +424,7 @@ watch(selectedTombIds, clampScheduleCounts);
         </div>
 
         <p class="mt-3 text-sm leading-7 text-white/56">
-          {{ hasWorshipDate ? `未分配的 ${unassignedCount} 个墓点默认按现场情况机动安排。` : "请先保存祭扫日期，保存后才能设置上午和下午数量。" }}
+          {{ hasWorshipDate ? `未分配的 ${unassignedCount} 个点位默认按现场情况机动安排。` : "请先保存祭扫日期，保存后才能设置上午和下午数量。" }}
         </p>
       </NCard>
 
@@ -359,11 +452,11 @@ watch(selectedTombIds, clampScheduleCounts);
           </div>
         </div>
         <div v-else class="admin-surface-muted p-5 text-sm text-white/58">
-          还没有加入墓点，先在下面点“加入顺序”即可开始配置。
+          还没有加入点位，先在下面点“加入顺序”即可开始配置。
         </div>
       </NCard>
 
-      <NCard class="admin-toolbar-card" :bordered="false" title="可加入墓点">
+      <NCard class="admin-toolbar-card" :bordered="false" title="可加入点位">
         <div v-if="availableTombs.length" class="grid gap-3 md:grid-cols-2">
           <div
             v-for="tomb in availableTombs"
@@ -380,7 +473,7 @@ watch(selectedTombIds, clampScheduleCounts);
           </div>
         </div>
         <div v-else class="admin-surface-muted p-5 text-sm text-white/58">
-          当前家族的墓点都已经加入到主线路里了。
+          当前家族的点位都已经加入到主线路里了。
         </div>
 
         <div class="mt-5 flex justify-end">
@@ -390,5 +483,14 @@ watch(selectedTombIds, clampScheduleCounts);
         </div>
       </NCard>
     </template>
+
+    <NCard class="admin-toolbar-card" :bordered="false" title="路线模板列表">
+      <div class="mb-4 flex flex-wrap items-center gap-3">
+        <NInput v-model:value="keyword" clearable placeholder="按路线名称、说明或点位名称搜索" />
+        <NButton type="primary" @click="router.push('/routes/new')">新增路线模板</NButton>
+      </div>
+
+      <NDataTable :columns="columns" :data="filteredRoutes" :bordered="false" :single-line="false" />
+    </NCard>
   </div>
 </template>
