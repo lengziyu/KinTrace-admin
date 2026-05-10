@@ -9,17 +9,10 @@ export interface AdminProfile {
 }
 
 type AdminLoginPayload =
-  | {
-      mode: "super";
-      username: string;
-      password: string;
-    }
-  | {
-      mode: "family";
-      phone: string;
-      familyCode?: string;
-      inviteCode?: string;
-    };
+  {
+    phone: string;
+    password: string;
+  };
 
 const TOKEN_KEY = "kintrace-admin-token";
 const PROFILE_KEY = "kintrace-admin-profile";
@@ -56,21 +49,15 @@ export const useAuthStore = defineStore("admin-auth", {
     async login(payload: AdminLoginPayload) {
       this.loading = true;
       try {
-        const body =
-          payload.mode === "super"
-            ? { username: payload.username, password: payload.password }
-            : {
-                phone: payload.phone,
-                familyCode: payload.familyCode,
-                inviteCode: payload.inviteCode,
-              };
-
         const data = await httpRequest<{
           accessToken: string;
           user: AdminProfile;
         }>("auth/admin/login", {
           method: "POST",
-          body: JSON.stringify(body),
+          body: JSON.stringify({
+            phone: payload.phone.trim(),
+            password: payload.password.trim(),
+          }),
         });
 
         this.token = data.accessToken;
