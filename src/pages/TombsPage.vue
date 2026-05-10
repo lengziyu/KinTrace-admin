@@ -29,7 +29,6 @@ const drawerVisible = ref(false);
 const editingId = ref("");
 const keyword = ref("");
 const uploading = ref(false);
-const locating = ref(false);
 
 const form = reactive({
   familyId: "",
@@ -114,32 +113,6 @@ function updatePickedLocation(payload: { lng: number; lat: number }) {
   form.lat = payload.lat.toFixed(6);
 }
 
-async function useCurrentLocation() {
-  if (!navigator.geolocation) {
-    message.warning("当前浏览器不支持定位");
-    return;
-  }
-
-  locating.value = true;
-  try {
-    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 5000,
-      });
-    });
-
-    form.lng = position.coords.longitude.toFixed(6);
-    form.lat = position.coords.latitude.toFixed(6);
-    message.success("已获取当前位置");
-  } catch (error) {
-    message.error(error instanceof Error ? error.message : "定位失败");
-  } finally {
-    locating.value = false;
-  }
-}
-
 async function submit() {
   const payload = {
     familyId: form.familyId || adminStore.currentFamily?.id || "",
@@ -157,25 +130,25 @@ async function submit() {
   try {
     if (editingId.value) {
       await adminStore.updateTomb(editingId.value, payload);
-      message.success("点位已更新");
+      message.success("墓点已更新");
     } else {
       await adminStore.createTomb(payload);
-      message.success("点位已创建");
+      message.success("墓点已创建");
     }
 
     drawerVisible.value = false;
     resetForm();
   } catch (error) {
-    message.error(error instanceof Error ? error.message : "点位保存失败");
+    message.error(error instanceof Error ? error.message : "墓点保存失败");
   }
 }
 
 async function remove(pointId: string) {
   try {
     await adminStore.deleteTomb(pointId);
-    message.success("点位已删除");
+    message.success("墓点已删除");
   } catch (error) {
-    message.error(error instanceof Error ? error.message : "点位删除失败");
+    message.error(error instanceof Error ? error.message : "墓点删除失败");
   }
 }
 
@@ -217,12 +190,16 @@ const columns = computed<DataTableColumns<TombPoint>>(() => [
         : h(TombCover, { tomb: row, class: "h-[56px] w-[84px]" }),
   },
   {
-    title: "点位信息",
+    title: "墓点信息",
     key: "name",
     render: (row) =>
       h("div", { class: "space-y-1" }, [
         h("p", { class: "text-sm font-semibold text-white" }, row.name),
-        h("p", { class: "text-xs text-white/46" }, `${row.titleName || "未填写称谓"} · ${row.generation || "未填写辈分"}`),
+        h(
+          "p",
+          { class: "text-xs text-white/46" },
+          `${row.titleName || "未填写称谓"} · ${row.generation || "未填写辈分"}`,
+        ),
       ]),
   },
   {
@@ -262,10 +239,10 @@ resetForm();
 
 <template>
   <div class="space-y-6">
-    <NCard class="admin-toolbar-card" :bordered="false" title="祭扫点位列表">
+    <NCard class="admin-toolbar-card" :bordered="false" title="祭扫墓点列表">
       <div class="mb-4 flex flex-wrap items-center gap-3">
-        <NInput v-model:value="keyword" placeholder="按点位名称、称谓、支系或片区搜索" clearable />
-        <NButton type="primary" @click="openCreateDrawer">新增点位</NButton>
+        <NInput v-model:value="keyword" placeholder="按名称、称谓、支系或片区搜索" clearable />
+        <NButton type="primary" @click="openCreateDrawer">新增墓点</NButton>
       </div>
 
       <NDataTable
@@ -277,13 +254,13 @@ resetForm();
     </NCard>
 
     <NDrawer v-model:show="drawerVisible" :width="520" placement="right">
-      <NDrawerContent :title="editingId ? '编辑点位' : '新增点位'" closable>
+      <NDrawerContent :title="editingId ? '编辑墓点' : '新增墓点'" closable>
         <NForm label-placement="top">
           <NFormItem label="所属家族">
             <NSelect v-model:value="form.familyId" :options="familyOptions" />
           </NFormItem>
-          <NFormItem label="点位名称">
-            <NInput v-model:value="form.name" placeholder="请输入祭扫点位名称" />
+          <NFormItem label="墓点名称">
+            <NInput v-model:value="form.name" placeholder="请输入祭扫墓点名称" />
           </NFormItem>
           <NFormItem label="称谓">
             <NInput v-model:value="form.titleName" placeholder="例如：始祖 / 二房先人" />
@@ -308,8 +285,7 @@ resetForm();
           </div>
 
           <div class="mb-4 flex flex-wrap items-center gap-3">
-            <NButton tertiary :loading="locating" @click="useCurrentLocation">获取当前位置</NButton>
-            <span class="text-xs text-white/46">支持手动录入经纬度，也支持地图点选定位。</span>
+            <span class="text-xs text-white/46">支持手动录入经纬度，也支持直接在地图上点选定位。</span>
           </div>
 
           <LocationPickerMap
@@ -319,14 +295,14 @@ resetForm();
           />
 
           <NFormItem class="mt-4" label="封面图地址">
-            <NInput v-model:value="form.coverImage" placeholder="可手动填写，也可直接上传图片" />
+            <NInput v-model:value="form.coverImage" placeholder="可手动填写，也可以直接上传图片" />
           </NFormItem>
-          <NFormItem label="点位说明">
+          <NFormItem label="墓点说明">
             <NInput
               v-model:value="form.description"
               type="textarea"
               :autosize="{ minRows: 3, maxRows: 4 }"
-              placeholder="记录点位背景、识别方式或祭扫提示"
+              placeholder="记录墓点背景、辨识方式或现场提醒"
             />
           </NFormItem>
         </NForm>
@@ -346,7 +322,7 @@ resetForm();
           <div class="flex justify-end gap-3">
             <NButton tertiary @click="drawerVisible = false">取消</NButton>
             <NButton type="primary" @click="submit">
-              {{ editingId ? "保存点位" : "创建点位" }}
+              {{ editingId ? "保存墓点" : "创建墓点" }}
             </NButton>
           </div>
         </template>

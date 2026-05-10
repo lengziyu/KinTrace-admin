@@ -101,6 +101,11 @@ export interface RoutePlan {
   name: string;
   description: string | null;
   tombIds: string[];
+  isPrimary: boolean;
+  morningTombCount: number;
+  afternoonTombCount: number;
+  planRevision: number;
+  planUpdatedAt: string | null;
   createdByMemberId: string | null;
   createdAt: string;
   updatedAt: string;

@@ -40,39 +40,46 @@ const chartMutedTextColor = computed(() => (isDark.value ? "rgba(255,255,255,0.4
 const chartGridColor = computed(() => (isDark.value ? "rgba(255,255,255,0.06)" : "rgba(148,163,184,0.24)"));
 const doughnutBorderColor = computed(() => (isDark.value ? "rgba(15,18,23,0.75)" : "rgba(255,255,255,0.96)"));
 
+function formatDateTime(value?: string | null) {
+  if (!value) {
+    return "未设置";
+  }
+  return new Date(value).toLocaleString("zh-CN");
+}
+
 const summaryCards = computed(() => [
   {
     label: isSuperAdmin.value ? "家族空间" : "当前家族",
     value: adminStore.summary.families,
-    hint: isSuperAdmin.value ? "已接入协作空间" : "当前正在维护的家族空间",
+    hint: isSuperAdmin.value ? "已接入的协作空间" : "当前正在维护的家族空间",
     color: "#60a5fa",
     icon: Shield,
   },
   {
     label: "家族成员",
     value: adminStore.summary.members,
-    hint: "参与祭扫的成员",
+    hint: "参与祭扫协作的成员数量",
     color: "#22c55e",
     icon: Users,
   },
   {
-    label: "点位数量",
+    label: "墓点数量",
     value: adminStore.summary.tombs,
-    hint: "地图坐标已录入",
+    hint: "地图坐标已经录入完成",
     color: "#f59e0b",
     icon: MapPinned,
   },
   {
     label: "待审留言",
     value: adminStore.summary.pendingMessages,
-    hint: "需要尽快确认",
+    hint: "前台提交后等待审核",
     color: "#f97316",
     icon: Compass,
   },
 ]);
 
 const overviewChartData = computed(() => ({
-  labels: ["成员", "点位", "路线模板", "留言"],
+  labels: ["成员", "墓点", "线路", "留言"],
   datasets: [
     {
       label: "当前规模",
@@ -95,7 +102,7 @@ const taskChartData = computed(() => {
   const closed = adminStore.tasks.filter((item) => item.status === "closed").length;
 
   return {
-    labels: ["草稿", "进行中", "已关闭"],
+    labels: ["草稿", "进行中", "已结束"],
     datasets: [
       {
         data: [draft, active, closed],
@@ -163,8 +170,8 @@ const doughnutOptions = computed(() => ({
 const shortcuts = computed(() => {
   const cards = [
     {
-      label: "点位管理",
-      hint: "录入坐标、封面图与纪念区",
+      label: "墓点管理",
+      hint: "录入坐标、封面图和纪念区信息",
       icon: MapPinned,
       to: "/tombs",
     },
@@ -175,14 +182,14 @@ const shortcuts = computed(() => {
       to: "/messages",
     },
     {
-      label: "路线模板",
-      hint: "沉淀常用祭扫顺序",
+      label: "线路设置",
+      hint: "快速维护当年的祭扫顺序",
       icon: Route,
       to: "/routes",
     },
     {
       label: "年度任务",
-      hint: "安排当年的祭扫区间与状态",
+      hint: "查看祭扫区间和当前任务状态",
       icon: CalendarClock,
       to: "/tasks",
     },
@@ -191,7 +198,7 @@ const shortcuts = computed(() => {
   if (isSuperAdmin.value) {
     cards[0] = {
       label: "家族管理",
-      hint: "维护家族资料与祭拜时间",
+      hint: "维护家族资料、日期和邀请入口",
       icon: Shield,
       to: "/families",
     };
@@ -222,7 +229,7 @@ const nextReminder = computed(() => {
       <div>
         <h2 class="text-[22px] font-semibold text-white">概览工作台</h2>
         <p class="mt-1 text-sm text-white/46">
-          {{ authStore.profile?.displayName ?? "Admin" }}，今天优先维护家族设置、点位数据和留言审核。
+          {{ authStore.profile?.displayName ?? "管理员" }}，今天优先关注家族设置、墓点资料和留言审核。
         </p>
       </div>
       <NSpace :size="10">
@@ -251,7 +258,7 @@ const nextReminder = computed(() => {
 
     <NGrid cols="1 xl:3" responsive="screen" :x-gap="10" :y-gap="10">
       <NGridItem span="2">
-        <NCard class="admin-toolbar-card overflow-hidden h-[316px]" :bordered="false" title="数据汇总" content-style="padding: 12px 14px 10px;">
+        <NCard class="admin-toolbar-card overflow-hidden h-[316px]" :bordered="false" title="数据概览" content-style="padding: 12px 14px 10px;">
           <div class="chart-panel chart-panel--bar h-full">
             <Bar :data="overviewChartData" :options="barOptions" />
           </div>
@@ -269,7 +276,7 @@ const nextReminder = computed(() => {
 
     <NGrid cols="1 xl:3" responsive="screen" :x-gap="10" :y-gap="10">
       <NGridItem span="2">
-        <NCard class="admin-toolbar-card h-[286px]" :bordered="false" title="快捷工作台" content-style="padding: 10px 14px 12px;">
+        <NCard class="admin-toolbar-card h-[336px]" :bordered="false" title="快捷入口" content-style="padding: 10px 14px 12px;">
           <div class="grid gap-3 md:grid-cols-2">
             <div
               v-for="item in shortcuts"
@@ -297,10 +304,10 @@ const nextReminder = computed(() => {
       </NGridItem>
 
       <NGridItem>
-        <NCard class="admin-toolbar-card h-[286px]" :bordered="false" title="近期提醒" content-style="padding: 10px 14px 12px;">
+        <NCard class="admin-toolbar-card h-[336px]" :bordered="false" title="近期提醒" content-style="padding: 10px 14px 12px;">
           <div class="flex h-full flex-col gap-3">
             <div class="admin-surface-muted p-4">
-              <p class="text-sm text-white/46">进行中任务</p>
+              <p class="text-sm text-white/46">进行中的任务</p>
               <p class="mt-2 text-[26px] font-semibold text-white">{{ adminStore.summary.activeTasks }}</p>
               <NProgress
                 class="mt-3"
@@ -318,14 +325,14 @@ const nextReminder = computed(() => {
                 </template>
                 <template #description>
                   <span class="text-white/46">
-                    下次祭拜：{{ new Date(nextReminder.upcomingWorshipAt ?? "").toLocaleString("zh-CN") }}
+                    下次祭扫：{{ formatDateTime(nextReminder.upcomingWorshipAt) }}
                   </span>
                 </template>
               </NThing>
             </div>
 
             <div v-else class="admin-surface-muted flex-1 p-4 text-sm text-white/46">
-              还没有设置下一次家族祭拜时间，可以前往家族管理页补充。
+              还没有设置下一次家族祭扫日期，可以前往家族管理或线路设置补充。
             </div>
           </div>
         </NCard>

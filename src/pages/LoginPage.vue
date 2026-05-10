@@ -1,24 +1,57 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { NAlert, NButton, NCard, NForm, NFormItem, NInput, NSpace, NTag } from "naive-ui";
+import {
+  NAlert,
+  NButton,
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NSpace,
+  NTabPane,
+  NTabs,
+  NTag,
+} from "naive-ui";
 import BrandLogo from "@/components/BrandLogo.vue";
 import { useAuthStore } from "@/stores/auth";
 
 const APP_VERSION = "MVP 0.3.0";
 
-const username = ref("admin");
+const loginMode = ref<"family" | "super">("family");
+const phone = ref("13800001001");
+const inviteCode = ref("chenshi_237");
+const username = ref("superadmin");
 const password = ref("KinTrace123");
 const router = useRouter();
 const authStore = useAuthStore();
 const error = ref("");
-const loadingText = computed(() => (authStore.loading ? "登录中..." : "进入后台"));
+const loadingText = computed(() =>
+  authStore.loading
+    ? "登录中..."
+    : loginMode.value === "family"
+      ? "进入家族后台"
+      : "进入超管后台",
+);
 
 async function submit() {
   error.value = "";
 
   try {
-    await authStore.login(username.value, password.value);
+    if (loginMode.value === "family") {
+      await authStore.login({
+        mode: "family",
+        phone: phone.value,
+        inviteCode: inviteCode.value,
+      });
+    } else {
+      await authStore.login({
+        mode: "super",
+        username: username.value,
+        password: password.value,
+      });
+    }
+
     await router.push("/dashboard");
   } catch (submitError) {
     error.value = submitError instanceof Error ? submitError.message : "登录失败，请稍后重试";
@@ -39,25 +72,26 @@ async function submit() {
             <h1 class="mt-5 text-4xl font-semibold leading-[1.25] text-white">
               家族祭扫协作
               <br />
-              深灰运营控制台
+              统一管理后台
             </h1>
             <p class="mt-4 max-w-2xl text-base leading-8 text-white/56">
-              用统一的后台完成家族、成员、祭扫点位、年度任务、留言审核与路线模板管理。地图优先，录入效率优先，视觉保持克制与庄重。
+              家族管理员直接使用和 H5 相同的成员身份登录后台，只有管理员角色才能进入。
+              超级管理员继续使用独立账号维护全局配置和全部家族。
             </p>
           </div>
 
           <div class="grid gap-4 md:grid-cols-3">
             <div class="admin-surface-muted p-4">
-              <p class="text-sm text-white/48">后台账号</p>
-              <p class="mt-3 text-lg font-semibold text-white">admin</p>
+              <p class="text-sm text-white/48">家族管理员</p>
+              <p class="mt-3 text-lg font-semibold text-white">手机号 + 邀请码</p>
             </div>
             <div class="admin-surface-muted p-4">
-              <p class="text-sm text-white/48">默认密码</p>
-              <p class="mt-3 text-lg font-semibold text-white">KinTrace123</p>
+              <p class="text-sm text-white/48">超级管理员</p>
+              <p class="mt-3 text-lg font-semibold text-white">账号 + 密码</p>
             </div>
             <div class="admin-surface-muted p-4">
-              <p class="text-sm text-white/48">当前风格</p>
-              <p class="mt-3 text-lg font-semibold text-white">Naive 深灰控制台</p>
+              <p class="text-sm text-white/48">默认超管</p>
+              <p class="mt-3 text-lg font-semibold text-white">superadmin</p>
             </div>
           </div>
         </div>
@@ -69,11 +103,11 @@ async function submit() {
 
           <div>
             <div class="flex items-center gap-3">
-              <h2 class="text-2xl font-semibold text-white">管理员登录</h2>
+              <h2 class="text-2xl font-semibold text-white">后台登录</h2>
               <NTag round size="small" type="info">{{ APP_VERSION }}</NTag>
             </div>
             <p class="mt-2 text-sm leading-7 text-white/52">
-              超级管理员可维护家族空间与品牌设置，家族管理员聚焦所属家族的成员、点位、任务和留言。
+              家族管理员和 H5 使用同一个成员身份。普通成员即使知道手机号和邀请码，也无法登录后台。
             </p>
           </div>
 
@@ -81,33 +115,63 @@ async function submit() {
             {{ error }}
           </NAlert>
 
-          <NForm label-placement="top" @submit.prevent="submit">
-            <NFormItem label="用户名">
-              <NInput
-                v-model:value="username"
-                size="large"
-                placeholder="请输入管理员用户名"
-              />
-            </NFormItem>
-            <NFormItem label="密码">
-              <NInput
-                v-model:value="password"
-                size="large"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入登录密码"
-              />
-            </NFormItem>
+          <NTabs v-model:value="loginMode" type="segment">
+            <NTabPane name="family" tab="家族管理员">
+              <NForm label-placement="top" @submit.prevent="submit">
+                <NFormItem label="手机号">
+                  <NInput
+                    v-model:value="phone"
+                    size="large"
+                    placeholder="请输入家族管理员手机号"
+                  />
+                </NFormItem>
+                <NFormItem label="家族邀请码">
+                  <NInput
+                    v-model:value="inviteCode"
+                    size="large"
+                    placeholder="例如：chenshi_237"
+                  />
+                </NFormItem>
 
-            <NSpace vertical :size="14">
-              <NButton type="primary" block size="large" :loading="authStore.loading" @click="submit">
-                {{ loadingText }}
-              </NButton>
-              <RouterLink to="/about" class="text-sm text-[#93c5fd]">
-                查看产品介绍
-              </RouterLink>
-            </NSpace>
-          </NForm>
+                <NSpace vertical :size="14">
+                  <NButton type="primary" block size="large" :loading="authStore.loading" @click="submit">
+                    {{ loadingText }}
+                  </NButton>
+                </NSpace>
+              </NForm>
+            </NTabPane>
+
+            <NTabPane name="super" tab="超级管理员">
+              <NForm label-placement="top" @submit.prevent="submit">
+                <NFormItem label="账号">
+                  <NInput
+                    v-model:value="username"
+                    size="large"
+                    placeholder="请输入超级管理员账号"
+                  />
+                </NFormItem>
+                <NFormItem label="密码">
+                  <NInput
+                    v-model:value="password"
+                    size="large"
+                    type="password"
+                    show-password-on="click"
+                    placeholder="请输入登录密码"
+                  />
+                </NFormItem>
+
+                <NSpace vertical :size="14">
+                  <NButton type="primary" block size="large" :loading="authStore.loading" @click="submit">
+                    {{ loadingText }}
+                  </NButton>
+                </NSpace>
+              </NForm>
+            </NTabPane>
+          </NTabs>
+
+          <RouterLink to="/about" class="text-sm text-[#93c5fd]">
+            查看产品介绍
+          </RouterLink>
         </div>
       </NCard>
     </div>

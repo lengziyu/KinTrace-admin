@@ -5,6 +5,7 @@ type ApiResponse<T> = {
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3000/api/v1";
+const ADMIN_TOKEN_KEY = "kintrace-admin-token";
 
 function joinUrl(baseUrl: string, path: string) {
   return `${baseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
@@ -30,12 +31,23 @@ export function resolveAssetUrl(path?: string | null) {
   return new URL(path, `${getApiOrigin()}/`).toString();
 }
 
+function buildAuthHeaders(headers?: HeadersInit) {
+  const nextHeaders = new Headers(headers);
+  const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+
+  if (token && !nextHeaders.has("Authorization")) {
+    nextHeaders.set("Authorization", `Bearer ${token}`);
+  }
+
+  return nextHeaders;
+}
+
 export async function httpRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(joinUrl(getApiBaseUrl(), path), {
-    headers: {
+    headers: buildAuthHeaders({
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),
-    },
+    }),
     ...init,
   });
 
@@ -58,6 +70,7 @@ export async function uploadImage(file: File) {
 
   const response = await fetch(joinUrl(getApiBaseUrl(), "uploads/images"), {
     method: "POST",
+    headers: buildAuthHeaders(),
     body: formData,
   });
 

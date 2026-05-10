@@ -26,11 +26,11 @@ const mockSnapshot: AdminSnapshot = {
   },
   families: [
     {
-      id: "family-1",
-      name: "林氏宗亲",
-      code: "lin-family",
-      description: "用于演示家族祭扫协作流程的示例家族。",
-      inviteCode: "KINTRACE-LIN",
+      id: "family-chen",
+      name: "陈氏宗亲",
+      code: "chenshi",
+      description: "用于演示家族祭扫协作流程的默认家族。",
+      inviteCode: "chenshi_237",
       ownerUserId: null,
       upcomingWorshipAt: "2026-04-15T08:30:00+08:00",
       visitRangeMeters: 300,
@@ -38,13 +38,13 @@ const mockSnapshot: AdminSnapshot = {
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
     {
-      id: "family-2",
-      name: "陈氏家族",
-      code: "chen-family",
-      description: "用于演示多家族切换体验的第二个家族空间。",
-      inviteCode: "KINTRACE-CHEN",
+      id: "family-lin",
+      name: "林氏宗亲",
+      code: "linshi",
+      description: "用于演示多家族切换和线路协作的第二个家族。",
+      inviteCode: "linshi_321",
       ownerUserId: null,
-      upcomingWorshipAt: "2026-04-18T17:30:00+08:00",
+      upcomingWorshipAt: "2026-04-18T09:00:00+08:00",
       visitRangeMeters: 300,
       createdAt: "2026-04-02T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
@@ -52,12 +52,12 @@ const mockSnapshot: AdminSnapshot = {
   ],
   members: [
     {
-      id: "member-1",
-      familyId: "family-1",
+      id: "member-chen-admin",
+      familyId: "family-chen",
       userId: null,
-      nickname: "林长安",
+      nickname: "陈宗礼",
       avatar: null,
-      phone: null,
+      phone: "13800001001",
       role: "admin",
       joinSource: "seed",
       status: "active",
@@ -66,12 +66,12 @@ const mockSnapshot: AdminSnapshot = {
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
     {
-      id: "member-2",
-      familyId: "family-1",
+      id: "member-chen-user",
+      familyId: "family-chen",
       userId: null,
-      nickname: "林秋澄",
+      nickname: "陈明远",
       avatar: null,
-      phone: null,
+      phone: "13800001002",
       role: "member",
       joinSource: "seed",
       status: "active",
@@ -80,12 +80,12 @@ const mockSnapshot: AdminSnapshot = {
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
     {
-      id: "member-3",
-      familyId: "family-2",
+      id: "member-lin-admin",
+      familyId: "family-lin",
       userId: null,
-      nickname: "陈敬和",
+      nickname: "林敬修",
       avatar: null,
-      phone: null,
+      phone: "13800002001",
       role: "admin",
       joinSource: "seed",
       status: "active",
@@ -93,49 +93,92 @@ const mockSnapshot: AdminSnapshot = {
       createdAt: "2026-04-02T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
+    {
+      id: "member-lin-user",
+      familyId: "family-lin",
+      userId: null,
+      nickname: "林秋澄",
+      avatar: null,
+      phone: "13800002002",
+      role: "member",
+      joinSource: "seed",
+      status: "active",
+      joinedAt: "2026-04-02T08:00:00.000Z",
+      createdAt: "2026-04-02T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+    {
+      id: "member-lin-manager",
+      familyId: "family-lin",
+      userId: null,
+      nickname: "林雅衡",
+      avatar: null,
+      phone: "13800002003",
+      role: "manager",
+      joinSource: "seed",
+      status: "active",
+      joinedAt: "2026-04-03T08:00:00.000Z",
+      createdAt: "2026-04-03T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
   ],
   tombs: [
     {
-      id: "tomb-1",
-      familyId: "family-1",
-      name: "始祖林公纪念点",
+      id: "tomb-chen-1",
+      familyId: "family-chen",
+      name: "陈氏始祖纪念点",
       titleName: "始祖",
       generation: "一世",
       branchName: "宗脉主支",
       lng: 121.4737,
       lat: 31.2304,
       areaName: "松泽纪念园",
-      description: "核心祭扫点位。",
+      description: "家族年度祭扫的核心墓点。",
       coverImage: null,
       createdAt: "2026-04-01T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
     {
-      id: "tomb-2",
-      familyId: "family-1",
-      name: "二房先人纪念点",
+      id: "tomb-chen-2",
+      familyId: "family-chen",
+      name: "陈氏二房先人",
       titleName: "二房先人",
       generation: "三世",
       branchName: "东房",
       lng: 121.4837,
       lat: 31.2204,
-      areaName: "东岭纪念区",
-      description: "用于演示路线规划。",
+      areaName: "东园纪念区",
+      description: "用于演示上午与下午分段祭扫。",
       coverImage: null,
       createdAt: "2026-04-01T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
     {
-      id: "tomb-3",
-      familyId: "family-2",
-      name: "陈氏先贤纪念点",
+      id: "tomb-lin-1",
+      familyId: "family-lin",
+      name: "林氏先贤纪念点",
       titleName: "先贤",
       generation: "二世",
       branchName: "南支",
       lng: 120.1652,
       lat: 30.2741,
       areaName: "南麓纪念区",
-      description: "用于演示超管切换家族。",
+      description: "用于演示多家族数据切换。",
+      coverImage: null,
+      createdAt: "2026-04-02T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+    {
+      id: "tomb-lin-2",
+      familyId: "family-lin",
+      name: "林氏宗祠旧址",
+      titleName: "宗祠旧址",
+      generation: "祖居",
+      branchName: "北支",
+      lng: 120.1723,
+      lat: 30.2811,
+      areaName: "北山片区",
+      description: "适合放在路线尾段作为集合点。",
       coverImage: null,
       createdAt: "2026-04-02T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
@@ -143,34 +186,57 @@ const mockSnapshot: AdminSnapshot = {
   ],
   tasks: [
     {
-      id: "task-1",
-      familyId: "family-1",
+      id: "task-chen-2026",
+      familyId: "family-chen",
       year: 2026,
       name: "2026 清明祭扫",
       startDate: "2026-04-01",
       endDate: "2026-04-20",
       status: "active",
     },
+    {
+      id: "task-lin-2026",
+      familyId: "family-lin",
+      year: 2026,
+      name: "2026 春祭安排",
+      startDate: "2026-04-05",
+      endDate: "2026-04-18",
+      status: "draft",
+    },
   ],
   messages: [
     {
       id: "message-1",
-      familyId: "family-1",
-      tombId: "tomb-1",
-      memberId: "member-2",
-      content: "愿家人平安顺遂，子孙和睦。",
+      familyId: "family-chen",
+      tombId: "tomb-chen-1",
+      memberId: "member-chen-user",
+      content: "愿家门兴旺，后辈平安顺遂。",
       status: "pending",
       createdAt: "2026-04-04T03:20:00.000Z",
+    },
+    {
+      id: "message-2",
+      familyId: "family-lin",
+      tombId: "tomb-lin-1",
+      memberId: "member-lin-user",
+      content: "谨以微言追思先贤，愿宗亲和睦安康。",
+      status: "pending",
+      createdAt: "2026-04-09T06:15:00.000Z",
     },
   ],
   routes: [
     {
-      id: "route-1",
-      familyId: "family-1",
-      name: "清明主线",
-      description: "核心点位串联路线。",
-      tombIds: ["tomb-1", "tomb-2"],
-      createdByMemberId: "member-1",
+      id: "route-chen-1",
+      familyId: "family-chen",
+      name: "清明主线路",
+      description: "上午先扫主墓点，下午补充支系墓点。",
+      tombIds: ["tomb-chen-1", "tomb-chen-2"],
+      isPrimary: true,
+      morningTombCount: 1,
+      afternoonTombCount: 1,
+      planRevision: 2,
+      planUpdatedAt: "2026-04-09T10:00:00.000Z",
+      createdByMemberId: "member-chen-admin",
       createdAt: "2026-04-02T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
@@ -269,7 +335,7 @@ export const useAdminStore = defineStore("admin-data", {
         this.applySnapshot(snapshot);
         this.source = "api";
       } catch (error) {
-        this.useMockData(error instanceof Error ? error.message : "接口暂不可用");
+        this.useMockData(error instanceof Error ? error.message : "接口暂时不可用");
       } finally {
         this.loading = false;
       }
@@ -281,7 +347,8 @@ export const useAdminStore = defineStore("admin-data", {
     },
 
     async createFamily(
-      payload: Pick<FamilyGroup, "name" | "code" | "inviteCode" | "description" | "upcomingWorshipAt" | "visitRangeMeters">,
+      payload: Pick<FamilyGroup, "name" | "description" | "upcomingWorshipAt" | "visitRangeMeters"> &
+        Partial<Pick<FamilyGroup, "code" | "inviteCode">>,
     ) {
       const created = await httpRequest<FamilyGroup>("families", {
         method: "POST",
@@ -409,7 +476,17 @@ export const useAdminStore = defineStore("admin-data", {
     },
 
     async createRoute(
-      payload: Pick<RoutePlan, "familyId" | "name" | "description" | "tombIds" | "createdByMemberId">,
+      payload: Pick<
+        RoutePlan,
+        | "familyId"
+        | "name"
+        | "description"
+        | "tombIds"
+        | "createdByMemberId"
+        | "isPrimary"
+        | "morningTombCount"
+        | "afternoonTombCount"
+      >,
     ) {
       await httpRequest<RoutePlan>("route-plans", {
         method: "POST",
@@ -420,7 +497,18 @@ export const useAdminStore = defineStore("admin-data", {
 
     async updateRoute(
       id: string,
-      payload: Partial<Pick<RoutePlan, "name" | "description" | "tombIds" | "createdByMemberId">>,
+      payload: Partial<
+        Pick<
+          RoutePlan,
+          | "name"
+          | "description"
+          | "tombIds"
+          | "createdByMemberId"
+          | "isPrimary"
+          | "morningTombCount"
+          | "afternoonTombCount"
+        >
+      >,
     ) {
       await httpRequest<RoutePlan>(`route-plans/${id}`, {
         method: "PATCH",

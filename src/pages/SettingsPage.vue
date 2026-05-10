@@ -52,28 +52,28 @@ const pointMarkerPreview = computed(() =>
 const roleCards = computed(() => [
   {
     title: "超级管理员",
-    desc: "负责全局平台与家族空间管理，可以维护家族列表、品牌资源、系统设置与跨家族数据。",
+    desc: "负责全局平台和家族空间管理，可以维护家族列表、品牌资源、系统设置与跨家族数据。",
     enabled: authStore.profile?.role === "super_admin",
   },
   {
     title: "家族管理员",
-    desc: "负责所属家族的成员、祭扫点位、年度任务、路线模板和留言审核，不显示全局家族管理入口。",
+    desc: "负责所属家族的成员、墓点、年度任务、线路顺序和留言审核，不显示全局家族管理入口。",
     enabled: authStore.profile?.role === "family_admin",
   },
 ]);
 
 const aboutModules = [
-  "家族空间、成员、祭扫点位、年度任务、留言与路线模板的后台维护",
-  "家族祭拜时间设置并同步到 H5 首页倒计时",
-  "已拜定位阈值设置与位置校验",
-  "点位图片上传、默认 SVG 封面与 H5 图片展示",
+  "统一维护家族空间、成员、墓点、任务、留言和线路设置。",
+  "家族祭扫日期会同步到 H5 首页的倒计时和提醒模块。",
+  "已拜距离阈值和位置校验规则可以在这里维护。",
+  "墓点封面支持上传图片，也支持 H5 自动生成主题兼容封面。",
 ];
 
 const roadmap = [
-  "更细粒度的管理员权限与操作审计",
-  "位置共享升级为 WebSocket 实时推送",
-  "点位媒体资料压缩、分类与批量整理",
-  "家谱树、通知中心与代祭业务扩展",
+  "补充更细粒度的管理员权限和操作审计。",
+  "把位置共享升级为实时推送，减少手动刷新。",
+  "继续完善墓点媒体资料的分类、压缩和批量管理。",
+  "扩展家谱树、通知中心和代祭协作等能力。",
 ];
 
 function syncBrandForm() {
@@ -114,13 +114,13 @@ async function submitBrandSettings() {
     pointMarkerPreset: brandForm.pointMarkerPreset,
     pointMarkerIconUrl: brandForm.pointMarkerIconUrl.trim(),
   });
-  message.success("系统品牌与点位图标设置已保存");
+  message.success("品牌和地图图标设置已保存");
 }
 
 async function resetBrandSettings() {
   await brandStore.resetSettings();
   syncBrandForm();
-  message.success("系统设置已恢复默认");
+  message.success("系统设置已恢复默认值");
 }
 
 async function saveFamilySettings() {
@@ -164,7 +164,7 @@ async function uploadAsset(
       brandForm.pointMarkerIconUrl = uploaded.url;
     }
     options.onFinish();
-    message.success("图标资源上传成功");
+    message.success("资源上传成功");
   } catch (error) {
     options.onError();
     message.error(error instanceof Error ? error.message : "资源上传失败");
@@ -180,7 +180,7 @@ async function uploadAsset(
       <div>
         <h2 class="admin-page-title">系统设置</h2>
         <p class="admin-page-desc">
-          统一维护后台品牌资源、点位图标、权限说明、当前家族规则与产品信息。关于宗迹也已经并入这里，不再单独占一个菜单。
+          统一维护后台品牌资源、地图图标、角色说明、当前家族规则和产品说明。
         </p>
       </div>
       <NTag round type="info">平台设置</NTag>
@@ -188,7 +188,7 @@ async function uploadAsset(
 
     <NGrid cols="1 xl:3" responsive="screen" :x-gap="12" :y-gap="12">
       <NGridItem span="2">
-        <NCard class="admin-toolbar-card" :bordered="false" title="品牌与点位图标设置">
+        <NCard class="admin-toolbar-card" :bordered="false" title="品牌和地图图标设置">
           <div class="grid gap-5 xl:grid-cols-[1.2fr_340px]">
             <NForm label-placement="top">
               <NGrid cols="1 xl:2" responsive="screen" :x-gap="12">
@@ -205,7 +205,7 @@ async function uploadAsset(
               </NGrid>
 
               <NFormItem label="Logo 地址">
-                <NInput v-model:value="brandForm.logoUrl" placeholder="支持本地 /uploads/... 或完整图片地址，留空则使用默认 Logo" />
+                <NInput v-model:value="brandForm.logoUrl" placeholder="支持 /uploads/... 或完整图片地址，留空则使用默认 Logo" />
               </NFormItem>
 
               <NFormItem label="浏览器 Icon 地址">
@@ -221,7 +221,7 @@ async function uploadAsset(
                 </NUpload>
               </div>
 
-              <NFormItem label="点位图标预设">
+              <NFormItem label="地图点位图标预设">
                 <div class="grid gap-3 sm:grid-cols-2">
                   <button
                     v-for="item in pointMarkerOptions"
@@ -234,7 +234,7 @@ async function uploadAsset(
                     <img :src="getPointMarkerIcon(item.value)" alt="" class="h-10 w-10 rounded-xl" />
                     <div>
                       <p class="text-sm font-semibold text-white">{{ item.label }}</p>
-                      <p class="text-xs text-white/46">用于 H5 地图上的点位标识</p>
+                      <p class="text-xs text-white/46">用于 H5 地图上的墓点标识</p>
                     </div>
                   </button>
                 </div>
@@ -285,7 +285,7 @@ async function uploadAsset(
                   <div class="flex items-start justify-between">
                     <div>
                       <p class="text-xs text-white/40">H5 地图点位效果</p>
-                      <p class="mt-1 text-sm text-white/72">名称与图标同时展示</p>
+                      <p class="mt-1 text-sm text-white/72">名称和图标会一起展示</p>
                     </div>
                     <NTag round size="small" type="info">地图标识</NTag>
                   </div>
@@ -328,7 +328,7 @@ async function uploadAsset(
               <div class="flex items-center justify-between gap-3">
                 <p class="text-sm font-semibold text-white">{{ item.title }}</p>
                 <NTag round :type="item.enabled ? 'success' : 'default'">
-                  {{ item.enabled ? "当前角色" : "可分配" }}
+                  {{ item.enabled ? "当前角色" : "可分配角色" }}
                 </NTag>
               </div>
               <p class="mt-2 text-sm leading-7 text-white/52">{{ item.desc }}</p>
@@ -340,7 +340,7 @@ async function uploadAsset(
 
     <NGrid cols="1 xl:2" responsive="screen" :x-gap="12" :y-gap="12">
       <NGridItem>
-        <NCard class="admin-toolbar-card" :bordered="false" title="关于宗迹">
+        <NCard class="admin-toolbar-card" :bordered="false" title="当前能力">
           <div class="space-y-3">
             <div
               v-for="item in aboutModules"

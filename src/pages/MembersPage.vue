@@ -27,7 +27,7 @@ const editingId = ref("");
 const roleOptions = [
   { label: "管理员", value: "admin" },
   { label: "协管成员", value: "manager" },
-  { label: "家族成员", value: "member" },
+  { label: "普通成员", value: "member" },
 ];
 
 const statusOptions = [
@@ -116,7 +116,7 @@ async function submit() {
   };
 
   if (!payload.familyId || !payload.nickname) {
-    message.warning("请先补全成员昵称");
+    message.warning("请先填写成员姓名");
     return;
   }
 
@@ -206,7 +206,7 @@ resetForm();
   <div class="space-y-6">
     <NCard class="admin-toolbar-card" :bordered="false" title="成员列表">
       <div class="mb-4 flex flex-wrap items-center gap-3">
-        <NInput v-model:value="keyword" clearable placeholder="按昵称、手机号、角色或状态搜索" />
+        <NInput v-model:value="keyword" clearable placeholder="按姓名、手机号、角色或状态搜索" />
         <NButton type="primary" @click="openCreateDrawer">新增成员</NButton>
       </div>
 
@@ -219,11 +219,11 @@ resetForm();
           <NFormItem label="所属家族">
             <NSelect v-model:value="form.familyId" :options="familyOptions" />
           </NFormItem>
-          <NFormItem label="成员昵称">
-            <NInput v-model:value="form.nickname" placeholder="请输入成员昵称" />
+          <NFormItem label="成员姓名">
+            <NInput v-model:value="form.nickname" placeholder="请输入成员姓名" />
           </NFormItem>
           <NFormItem label="手机号">
-            <NInput v-model:value="form.phone" placeholder="可选" />
+            <NInput v-model:value="form.phone" placeholder="可选，用于后台与 H5 共用登录" />
           </NFormItem>
           <NFormItem label="角色">
             <NSelect v-model:value="form.role" :options="roleOptions" />

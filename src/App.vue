@@ -72,10 +72,10 @@ const menuOptions = computed<MenuOption[]>(() => {
   const base: MenuOption[] = [
     { key: "/dashboard", label: "概览", icon: renderIcon(LayoutDashboard) },
     { key: "/members", label: "成员管理", icon: renderIcon(Users) },
-    { key: "/tombs", label: "点位管理", icon: renderIcon(MapPinned) },
+    { key: "/tombs", label: "墓点管理", icon: renderIcon(MapPinned) },
     { key: "/tasks", label: "年度任务", icon: renderIcon(LayoutDashboard) },
     { key: "/messages", label: "留言审核", icon: renderIcon(MessageSquareMore) },
-    { key: "/routes", label: "路线模板", icon: renderIcon(Route) },
+    { key: "/routes", label: "线路设置", icon: renderIcon(Route) },
     { key: "/settings", label: "系统设置", icon: renderIcon(Settings) },
   ];
 
@@ -87,16 +87,24 @@ const menuOptions = computed<MenuOption[]>(() => {
 });
 
 const isStandalonePage = computed(() => ["/login", "/about"].includes(route.path));
-const currentTitle = computed(() => String(route.meta.title ?? "宗迹管理后台"));
+const pageTitle = computed(() => String(route.meta.title ?? "概览"));
+const familyTitle = computed(() => adminStore.currentFamily?.name?.trim() || "");
+const currentTitle = computed(() =>
+  !isStandalonePage.value && familyTitle.value ? `${familyTitle.value} · ${pageTitle.value}` : pageTitle.value,
+);
 const activeMenu = computed(() => route.path);
 const naiveTheme = computed(() => (themeStore.actualTheme === "dark" ? darkTheme : undefined));
 const themeIcon = computed(() => (themeStore.actualTheme === "dark" ? MoonStar : SunMedium));
 const themeLabel = computed(() => (themeStore.actualTheme === "dark" ? "切换到浅色主题" : "切换到深色主题"));
 const workspaceHint = computed(() => {
   if (isSuperAdmin.value) {
-    return adminStore.currentFamily ? `当前家族：${adminStore.currentFamily.name}` : "可维护全部家族空间与品牌资源";
+    return adminStore.currentFamily
+      ? `当前工作家族：${adminStore.currentFamily.name}`
+      : "可维护全部家族空间和品牌资源";
   }
-  return adminStore.currentFamily ? `当前负责：${adminStore.currentFamily.name}` : "聚焦所属家族的协作与录入";
+  return adminStore.currentFamily
+    ? `当前负责：${adminStore.currentFamily.name}`
+    : "聚焦所属家族的协作与资料维护";
 });
 const routablePaths = computed(() => new Set(menuOptions.value.map((item) => String(item.key))));
 const showTabs = computed(() => route.path !== "/dashboard" && visitedTabs.value.length > 0);
@@ -176,9 +184,17 @@ function closeTab(path: string) {
 }
 
 watch(
-  () => [route.path, String(route.meta.title ?? "宗迹管理后台")] as const,
+  () => [route.path, currentTitle.value] as const,
   ([path, title]) => {
     syncVisitedTabs(path, title);
+  },
+  { immediate: true },
+);
+
+watch(
+  () => currentTitle.value,
+  (title) => {
+    document.title = title;
   },
   { immediate: true },
 );
@@ -276,7 +292,7 @@ watch(
                         <NTag round size="small" type="warning">
                           待审 {{ adminStore.summary.pendingMessages }}
                         </NTag>
-                        <NInput round clearable placeholder="搜索页面、成员、点位" style="width: 260px">
+                        <NInput round clearable placeholder="搜索页面、成员、墓点" style="width: 260px">
                           <template #prefix>
                             <NIcon><Search /></NIcon>
                           </template>
@@ -352,7 +368,7 @@ watch(
             >
               <div class="space-y-4">
                 <p class="text-sm leading-7 text-white/56">
-                  超级管理员首次进入时需要确认当前工作家族。后续系统会记住这次选择，你也可以在左下角随时切换。
+                  超级管理员首次进入时需要确认当前工作家族。系统会记住这次选择，后续也可以在左下角随时切换。
                 </p>
                 <NSelect
                   v-model:value="chooserFamilyId"
