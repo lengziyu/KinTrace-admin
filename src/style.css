@@ -140,6 +140,37 @@ a {
   border-radius: 8px;
 }
 
+.admin-list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-list-search {
+  width: 100%;
+  max-width: 300px;
+}
+
+.admin-list-filter {
+  width: 100%;
+  max-width: 220px;
+}
+
+.admin-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .admin-list-toolbar {
+    flex-wrap: nowrap;
+  }
+}
+
 .admin-tabs-bar {
   display: flex;
   flex-wrap: wrap;

@@ -132,13 +132,14 @@ const columns = computed<DataTableColumns<MemorialMessage>>(() => [
     </div>
 
     <NCard class="admin-toolbar-card" :bordered="false" title="筛选与审核">
-      <div class="mb-4 grid gap-4 md:grid-cols-[1fr_220px]">
+      <div class="admin-list-toolbar mb-4">
         <NInput
           v-model:value="keyword"
+          class="admin-list-search"
           clearable
           placeholder="按留言内容、成员昵称或点位名称搜索"
         />
-        <NSelect v-model:value="statusFilter" :options="statusOptions" />
+        <NSelect v-model:value="statusFilter" class="admin-list-filter" :options="statusOptions" />
       </div>
 
       <NDataTable :columns="columns" :data="filteredMessages" :bordered="false" />

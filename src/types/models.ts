@@ -35,6 +35,53 @@ export interface FamilyMember {
   updatedAt: string;
 }
 
+export interface GenealogyPerson {
+  id: string;
+  familyId: string;
+  name: string;
+  gender: "male" | "female" | "unknown";
+  generationLevel: number;
+  generationLabel: string;
+  branchName: string | null;
+  parentId: string | null;
+  spouseName: string | null;
+  status: "living" | "deceased";
+  bio: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GenealogyChartIndi {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  famc?: string;
+  fams?: string[];
+  sex?: "M" | "F" | "U";
+  hideId?: boolean;
+  hideSex?: boolean;
+}
+
+export interface GenealogyChartFam {
+  id: string;
+  children?: string[];
+  wife?: string;
+  husb?: string;
+}
+
+export interface GenealogyChartData {
+  indis: GenealogyChartIndi[];
+  fams: GenealogyChartFam[];
+}
+
+export interface GenealogyTreeView {
+  familyId: string;
+  people: GenealogyPerson[];
+  chartData: GenealogyChartData;
+  startIndiId: string | null;
+}
+
 export interface TombPoint {
   id: string;
   familyId: string;
@@ -115,6 +162,7 @@ export interface AdminSnapshot {
   summary: DashboardSummary;
   families: FamilyGroup[];
   members: FamilyMember[];
+  genealogyPeople?: GenealogyPerson[];
   tombs: TombPoint[];
   tasks: WorshipTask[];
   messages: MemorialMessage[];

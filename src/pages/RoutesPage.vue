@@ -485,9 +485,11 @@ watch(selectedTombIds, clampScheduleCounts);
     </template>
 
     <NCard class="admin-toolbar-card" :bordered="false" title="路线模板列表">
-      <div class="mb-4 flex flex-wrap items-center gap-3">
-        <NInput v-model:value="keyword" clearable placeholder="按路线名称、说明或点位名称搜索" />
-        <NButton type="primary" @click="router.push('/routes/new')">新增路线模板</NButton>
+      <div class="admin-list-toolbar mb-4">
+        <NInput v-model:value="keyword" class="admin-list-search" clearable placeholder="按路线名称、说明或点位名称搜索" />
+        <div class="admin-list-actions">
+          <NButton type="primary" @click="router.push('/routes/new')">新增路线模板</NButton>
+        </div>
       </div>
 
       <NDataTable :columns="columns" :data="filteredRoutes" :bordered="false" :single-line="false" />

@@ -1,10 +1,14 @@
 import { defineStore } from "pinia";
+import { buildGenealogyTreeView } from "@/lib/genealogy";
 import { httpRequest } from "@/lib/http";
 import type {
   AdminSnapshot,
   DashboardSummary,
   FamilyGroup,
   FamilyMember,
+  GenealogyChartData,
+  GenealogyPerson,
+  GenealogyTreeView,
   MemorialMessage,
   RoutePlan,
   TombPoint,
@@ -14,6 +18,7 @@ import type {
 type DataSource = "api" | "mock";
 
 const SELECTED_FAMILY_KEY = "kintrace-admin-family-id";
+const GENEALOGY_STORAGE_KEY = "kintrace-admin-genealogy-people";
 
 const mockSnapshot: AdminSnapshot = {
   summary: {
@@ -119,6 +124,88 @@ const mockSnapshot: AdminSnapshot = {
       status: "active",
       joinedAt: "2026-04-03T08:00:00.000Z",
       createdAt: "2026-04-03T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+  ],
+  genealogyPeople: [
+    {
+      id: "gene-chen-1",
+      familyId: "family-chen",
+      name: "陈启源",
+      gender: "male",
+      generationLevel: 1,
+      generationLabel: "一世",
+      branchName: "宗脉主支",
+      parentId: null,
+      spouseName: "王氏",
+      status: "deceased",
+      bio: "陈氏入谱始祖，作为族谱展示的根节点示例。",
+      sortOrder: 1,
+      createdAt: "2026-04-01T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+    {
+      id: "gene-chen-2",
+      familyId: "family-chen",
+      name: "陈宗礼",
+      gender: "male",
+      generationLevel: 2,
+      generationLabel: "二世",
+      branchName: "宗脉主支",
+      parentId: "gene-chen-1",
+      spouseName: "周氏",
+      status: "deceased",
+      bio: "承续主支香火，用于演示父子关系和配偶展示。",
+      sortOrder: 1,
+      createdAt: "2026-04-01T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+    {
+      id: "gene-chen-3",
+      familyId: "family-chen",
+      name: "陈明远",
+      gender: "male",
+      generationLevel: 3,
+      generationLabel: "三世",
+      branchName: "东房",
+      parentId: "gene-chen-2",
+      spouseName: null,
+      status: "living",
+      bio: "当前在谱人物示例，强调族谱独立于用户体系维护。",
+      sortOrder: 1,
+      createdAt: "2026-04-01T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+    {
+      id: "gene-lin-1",
+      familyId: "family-lin",
+      name: "林守正",
+      gender: "male",
+      generationLevel: 1,
+      generationLabel: "一世",
+      branchName: "南支",
+      parentId: null,
+      spouseName: "吴氏",
+      status: "deceased",
+      bio: "林氏家族的根节点示例。",
+      sortOrder: 1,
+      createdAt: "2026-04-02T08:00:00.000Z",
+      updatedAt: "2026-04-08T08:00:00.000Z",
+    },
+    {
+      id: "gene-lin-2",
+      familyId: "family-lin",
+      name: "林敬修",
+      gender: "male",
+      generationLevel: 2,
+      generationLabel: "二世",
+      branchName: "南支",
+      parentId: "gene-lin-1",
+      spouseName: "赵氏",
+      status: "living",
+      bio: "用于演示多家族切换下的独立族谱展示。",
+      sortOrder: 1,
+      createdAt: "2026-04-02T08:00:00.000Z",
       updatedAt: "2026-04-08T08:00:00.000Z",
     },
   ],
@@ -243,6 +330,24 @@ const mockSnapshot: AdminSnapshot = {
   ],
 };
 
+function readGenealogyPeople() {
+  try {
+    const cached = localStorage.getItem(GENEALOGY_STORAGE_KEY);
+    if (!cached) {
+      return [...(mockSnapshot.genealogyPeople ?? [])];
+    }
+
+    const parsed = JSON.parse(cached) as GenealogyPerson[];
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : [...(mockSnapshot.genealogyPeople ?? [])];
+  } catch {
+    return [...(mockSnapshot.genealogyPeople ?? [])];
+  }
+}
+
+function createGenealogyId() {
+  return `gene-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
 function readSelectedFamilyId() {
   return localStorage.getItem(SELECTED_FAMILY_KEY) ?? "";
 }
@@ -256,6 +361,9 @@ export const useAdminStore = defineStore("admin-data", {
     summary: mockSnapshot.summary as DashboardSummary,
     families: mockSnapshot.families as FamilyGroup[],
     members: mockSnapshot.members as FamilyMember[],
+    genealogyPeople: readGenealogyPeople() as GenealogyPerson[],
+    genealogyChartData: { indis: [], fams: [] } as GenealogyChartData,
+    genealogyStartIndiId: "" as string,
     tombs: mockSnapshot.tombs as TombPoint[],
     tasks: mockSnapshot.tasks as WorshipTask[],
     messages: mockSnapshot.messages as MemorialMessage[],
@@ -270,6 +378,19 @@ export const useAdminStore = defineStore("admin-data", {
         label: item.name,
         value: item.id,
       }));
+    },
+    genealogyCurrentFamily(state) {
+      const familyId = state.selectedFamilyId || state.families[0]?.id || "";
+      return state.genealogyPeople.filter((item) => item.familyId === familyId);
+    },
+    genealogyCurrentTreeView(state) {
+      const familyId = state.selectedFamilyId || state.families[0]?.id || "";
+      return {
+        familyId,
+        people: state.genealogyPeople.filter((item) => item.familyId === familyId),
+        chartData: state.genealogyChartData,
+        startIndiId: state.genealogyStartIndiId || null,
+      };
     },
   },
   actions: {
@@ -290,10 +411,28 @@ export const useAdminStore = defineStore("admin-data", {
       return candidate || this.selectedFamilyId || this.families[0]?.id || "";
     },
 
+    persistGenealogyPeople() {
+      localStorage.setItem(GENEALOGY_STORAGE_KEY, JSON.stringify(this.genealogyPeople));
+    },
+
+    applyGenealogyView(view: GenealogyTreeView) {
+      this.genealogyPeople = [
+        ...this.genealogyPeople.filter((item) => item.familyId !== view.familyId),
+        ...view.people,
+      ];
+      this.genealogyChartData = view.chartData;
+      this.genealogyStartIndiId = view.startIndiId ?? "";
+      this.persistGenealogyPeople();
+    },
+
     applySnapshot(snapshot: AdminSnapshot) {
       this.summary = snapshot.summary;
       this.families = snapshot.families;
       this.members = snapshot.members;
+      if (snapshot.genealogyPeople?.length) {
+        this.genealogyPeople = snapshot.genealogyPeople;
+        this.persistGenealogyPeople();
+      }
       this.tombs = snapshot.tombs;
       this.tasks = snapshot.tasks;
       this.messages = snapshot.messages;
@@ -305,12 +444,20 @@ export const useAdminStore = defineStore("admin-data", {
         : fallbackFamilyId;
 
       this.setSelectedFamily(resolvedFamilyId);
+
+      const localPeople = this.genealogyPeople.filter((item) => item.familyId === resolvedFamilyId);
+      const view = buildGenealogyTreeView(resolvedFamilyId, localPeople);
+      this.genealogyChartData = view.chartData;
+      this.genealogyStartIndiId = view.startIndiId ?? "";
     },
 
     useMockData(message = "") {
       this.source = "mock";
       this.error = message;
-      this.applySnapshot(mockSnapshot);
+      this.applySnapshot({
+        ...mockSnapshot,
+        genealogyPeople: undefined,
+      });
     },
 
     async loadSnapshot(familyId?: string, allowBootstrapSelect = true) {
@@ -337,6 +484,7 @@ export const useAdminStore = defineStore("admin-data", {
       } catch (error) {
         this.useMockData(error instanceof Error ? error.message : "接口暂时不可用");
       } finally {
+        await this.loadGenealogy();
         this.loading = false;
       }
     },
@@ -344,6 +492,144 @@ export const useAdminStore = defineStore("admin-data", {
     async selectFamily(familyId: string) {
       this.setSelectedFamily(familyId);
       await this.loadSnapshot(familyId, false);
+    },
+
+    async loadGenealogy(familyId?: string) {
+      const resolvedFamilyId = this.ensureFamilyId(familyId);
+
+      try {
+        const view = await httpRequest<GenealogyTreeView>(
+          `genealogy/tree?familyId=${resolvedFamilyId}`,
+        );
+        this.applyGenealogyView(view);
+      } catch {
+        const people = readGenealogyPeople().filter((item) => item.familyId === resolvedFamilyId);
+        this.applyGenealogyView(buildGenealogyTreeView(resolvedFamilyId, people));
+      }
+    },
+
+    async createGenealogyPerson(
+      payload: Pick<
+        GenealogyPerson,
+        | "familyId"
+        | "name"
+        | "gender"
+        | "generationLevel"
+        | "generationLabel"
+        | "branchName"
+        | "parentId"
+        | "spouseName"
+        | "status"
+        | "bio"
+        | "sortOrder"
+      >,
+    ) {
+      const now = new Date().toISOString();
+
+      try {
+        await httpRequest<GenealogyPerson>("genealogy/people", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        await this.loadGenealogy(payload.familyId);
+        return;
+      } catch {
+        const created: GenealogyPerson = {
+          id: createGenealogyId(),
+          ...payload,
+          createdAt: now,
+          updatedAt: now,
+        };
+        this.genealogyPeople = [...this.genealogyPeople, created];
+      }
+
+      this.persistGenealogyPeople();
+      this.applyGenealogyView(buildGenealogyTreeView(payload.familyId, this.genealogyPeople.filter((item) => item.familyId === payload.familyId)));
+    },
+
+    async updateGenealogyPerson(
+      id: string,
+      payload: Partial<
+        Pick<
+          GenealogyPerson,
+          | "familyId"
+          | "name"
+          | "gender"
+          | "generationLevel"
+          | "generationLabel"
+          | "branchName"
+          | "parentId"
+          | "spouseName"
+          | "status"
+          | "bio"
+          | "sortOrder"
+        >
+      >,
+    ) {
+      const current = this.genealogyPeople.find((item) => item.id === id);
+
+      try {
+        await httpRequest<GenealogyPerson>(`genealogy/people/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+        await this.loadGenealogy(current?.familyId);
+        return;
+      } catch {
+        const now = new Date().toISOString();
+        this.genealogyPeople = this.genealogyPeople.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                ...payload,
+                updatedAt: now,
+              }
+            : item,
+        );
+      }
+
+      this.persistGenealogyPeople();
+      const nextFamilyId = current?.familyId ?? this.ensureFamilyId();
+      this.applyGenealogyView(
+        buildGenealogyTreeView(
+          nextFamilyId,
+          this.genealogyPeople.filter((item) => item.familyId === nextFamilyId),
+        ),
+      );
+    },
+
+    async deleteGenealogyPerson(id: string) {
+      const current = this.genealogyPeople.find((item) => item.id === id);
+
+      try {
+        await httpRequest(`genealogy/people/${id}`, {
+          method: "DELETE",
+        });
+        await this.loadGenealogy(current?.familyId);
+        return;
+      } catch {
+        // Local-first fallback keeps the simple version usable before backend is ready.
+      }
+
+      this.genealogyPeople = this.genealogyPeople
+        .filter((item) => item.id !== id)
+        .map((item) =>
+          item.parentId === id
+            ? {
+                ...item,
+                parentId: null,
+                updatedAt: new Date().toISOString(),
+              }
+            : item,
+        );
+      this.persistGenealogyPeople();
+      const nextFamilyId = current?.familyId ?? this.ensureFamilyId();
+      this.applyGenealogyView(
+        buildGenealogyTreeView(
+          nextFamilyId,
+          this.genealogyPeople.filter((item) => item.familyId === nextFamilyId),
+        ),
+      );
     },
 
     async createFamily(

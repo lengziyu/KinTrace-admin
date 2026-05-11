@@ -109,9 +109,11 @@ const columns = computed<DataTableColumns<TombPoint>>(() => [
 <template>
   <div class="space-y-6">
     <NCard class="admin-toolbar-card" :bordered="false" title="祭扫点位列表">
-      <div class="mb-4 flex flex-wrap items-center gap-3">
-        <NInput v-model:value="keyword" placeholder="按点位名称、称谓、支系或片区搜索" clearable />
-        <NButton type="primary" @click="router.push('/tombs/new')">新增点位</NButton>
+      <div class="admin-list-toolbar mb-4">
+        <NInput v-model:value="keyword" class="admin-list-search" placeholder="按点位名称、称谓、支系或片区搜索" clearable />
+        <div class="admin-list-actions">
+          <NButton type="primary" @click="router.push('/tombs/new')">新增点位</NButton>
+        </div>
       </div>
 
       <NDataTable

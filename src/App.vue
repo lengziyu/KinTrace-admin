@@ -8,6 +8,7 @@ import {
   MapPinned,
   MessageSquareMore,
   MoonStar,
+  Network,
   Route,
   Search,
   Settings,
@@ -72,6 +73,7 @@ const menuOptions = computed<MenuOption[]>(() => {
   const base: MenuOption[] = [
     { key: "/dashboard", label: "概览", icon: renderIcon(LayoutDashboard) },
     { key: "/members", label: "成员管理", icon: renderIcon(Users) },
+    { key: "/genealogy", label: "族谱管理", icon: renderIcon(Network) },
     { key: "/tombs", label: "点位管理", icon: renderIcon(MapPinned) },
     { key: "/tasks", label: "年度任务", icon: renderIcon(LayoutDashboard) },
     { key: "/messages", label: "留言审核", icon: renderIcon(MessageSquareMore) },
@@ -89,13 +91,14 @@ const menuOptions = computed<MenuOption[]>(() => {
 function resolveMenuKey(path: string) {
   if (path.startsWith("/families/")) return "/families";
   if (path.startsWith("/members/")) return "/members";
+  if (path.startsWith("/genealogy/")) return "/genealogy";
   if (path.startsWith("/tombs/")) return "/tombs";
   if (path.startsWith("/tasks/")) return "/tasks";
   if (path.startsWith("/routes/")) return "/routes";
   return path;
 }
 
-const isStandalonePage = computed(() => ["/login", "/about"].includes(route.path));
+const isStandalonePage = computed(() => Boolean(route.meta.standalone) || ["/login", "/about"].includes(route.path));
 const pageTitle = computed(() => String(route.meta.title ?? "概览"));
 const familyTitle = computed(() => adminStore.currentFamily?.name?.trim() || "");
 const currentTitle = computed(() =>
