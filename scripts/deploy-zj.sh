@@ -24,9 +24,9 @@ ADMIN_DIR="${APP_ROOT}/KinTrace-admin"
 H5_DIST_DIR="${KINTRACE_DIR}/apps/h5/dist"
 ADMIN_DIST_DIR="${ADMIN_DIR}/dist"
 
-# 你线上 nginx 对应的静态目录（如有不同，只改这里）
-H5_WEB_ROOT="${APP_ROOT}/www/zj.lengziyu.cn"
-ADMIN_WEB_ROOT="${APP_ROOT}/www/zj-admin.lengziyu.cn"
+# 线上 nginx 当前使用的静态目录
+H5_WEB_ROOT="${KINTRACE_DIR}/www"
+ADMIN_WEB_ROOT="${ADMIN_DIR}/www"
 
 PM2_NAME="zj-server"
 PM2_CWD="${KINTRACE_DIR}"
